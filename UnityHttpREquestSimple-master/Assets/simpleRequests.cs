@@ -5,6 +5,7 @@ using System.Collections;
 using System.Collections.Generic;
 using SimpleJSON;
 using TMPro;
+using UnityEngine.UI;
 
 public class simpleRequests : MonoBehaviour
 {
@@ -12,6 +13,8 @@ public class simpleRequests : MonoBehaviour
     TMP_Text texto;
     [SerializeField]
     List<NAbility> nAbility;
+    private string pokeImage;
+    public RawImage Image1;
     void Start()
     {
         // A correct website page.
@@ -56,6 +59,17 @@ public class simpleRequests : MonoBehaviour
                         AssetDatabase.CreateAsset(a, "Assets/Personas/" + a.name + ".asset");
                     }
 
+                    foreach (var sprites in root["sprites"])
+                    {
+                        //Debug.Log(abilities.Value);
+                        if(sprites.Value["home"] != null)
+                        {
+                            Debug.Log(sprites.Value["home"]["front_default"]);
+                            pokeImage = sprites.Value["home"]["front_default"];
+                        }
+                        
+                    }
+
 
 
                     /*
@@ -82,6 +96,19 @@ public class simpleRequests : MonoBehaviour
 
 
                     break;
+            }
+
+            UnityWebRequest www = UnityWebRequestTexture.GetTexture(pokeImage);
+            yield return www.SendWebRequest();
+
+            if (www.result != UnityWebRequest.Result.Success)
+            {
+                Debug.Log(www.error);
+            }
+            else
+            {
+                Texture myTexture = ((DownloadHandlerTexture)www.downloadHandler).texture;
+                Image1.texture = myTexture;
             }
         }
     }
