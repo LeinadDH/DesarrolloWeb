@@ -15,15 +15,22 @@ public class simpleRequests : MonoBehaviour
     List<NAbility> nAbility;
     private string pokeImage;
     public RawImage Image1;
+    public TMP_InputField pokemon;
+
     void Start()
     {
         // A correct website page.
-        StartCoroutine(GetRequest("https://pokeapi.co/api/v2/pokemon/nidoking"));
+        //StartCoroutine(GetRequest("https://pokeapi.co/api/v2/pokemon/ditto"));
 
         // A non-existing page.
         //StartCoroutine(GetRequest("https://error.html"));
     }
-   
+
+    private void Update()
+    {
+        
+    }
+
     IEnumerator GetRequest(string uri)
     {
         using (UnityWebRequest webRequest = UnityWebRequest.Get(uri))
@@ -108,8 +115,18 @@ public class simpleRequests : MonoBehaviour
             else
             {
                 Texture myTexture = ((DownloadHandlerTexture)www.downloadHandler).texture;
+                Debug.Log("Si se pudo");
                 Image1.texture = myTexture;
             }
         }
+    }
+
+    public void ButtonSearch()
+    {
+        if (pokemon != null)
+        {
+            StartCoroutine(GetRequest("https://pokeapi.co/api/v2/pokemon/" + pokemon.text.ToString()));
+        }
+        
     }
 }
