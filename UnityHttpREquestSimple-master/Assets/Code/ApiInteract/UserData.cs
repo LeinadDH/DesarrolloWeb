@@ -4,6 +4,6 @@ using UnityEngine;
 
 public class UserData : MonoBehaviour
 {
-    public string username;
-    public bool password;
+    public string Name { get; set; }
+    public bool IsComplete { get; set; }
 }

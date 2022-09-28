@@ -5,15 +5,16 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Analytics;
 using UnityEngine.Networking;
+using UnityEngine.UI;
 
 public class Cliente : MonoBehaviour
 {
-    public string user;
-    public bool pasword;
+    public string stringVariable;
+    public bool boolVariable;
 
     public void Post()
     {
-        StartCoroutine(Login(user, pasword));
+        StartCoroutine(Login(stringVariable, boolVariable));
     }
 
     public void Get()
@@ -55,8 +56,8 @@ public class Cliente : MonoBehaviour
         // Add Token to headers
 
         var user = new UserData();
-        user.username = username;
-        user.password = password;
+        user.Name = username;
+        user.IsComplete = password;
 
         string json = JsonUtility.ToJson(user);
 
