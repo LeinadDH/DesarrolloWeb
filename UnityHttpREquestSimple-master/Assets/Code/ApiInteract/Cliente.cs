@@ -22,6 +22,8 @@ public class Cliente : MonoBehaviour
     [Serializable]
     public class TodoTask
     {
+        public int id;
+
         public string name;
 
         public bool isComplete;
@@ -123,15 +125,14 @@ public class Cliente : MonoBehaviour
 
     public IEnumerator PutRequest()
     {
-        int id = idToDelete;
-
         TodoTask task = new TodoTask();
+        task.id = idToDelete;
         task.name = _name;
         task.isComplete = _isComplete;
 
         string json = JsonUtility.ToJson(task);
 
-        UnityWebRequest www = UnityWebRequest.Put(myApi + "/" + 4, json);
+        UnityWebRequest www = UnityWebRequest.Put(myApi + "/" + task.id, json);
         www.SetRequestHeader("Content-Type", "application/json");
 
         yield return www.SendWebRequest();
