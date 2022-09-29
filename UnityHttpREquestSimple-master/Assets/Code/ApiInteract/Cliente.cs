@@ -2,6 +2,10 @@ using SimpleJSON;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
+using System.Net;
+using UnityEditor.Experimental.GraphView;
+using UnityEditor.PackageManager.UI;
 using UnityEngine;
 using UnityEngine.Analytics;
 using UnityEngine.Networking;
@@ -9,17 +13,38 @@ using UnityEngine.UI;
 
 public class Cliente : MonoBehaviour
 {
-    public string stringVariable;
-    public bool boolVariable;
+    public string _name;
+    public bool _isComplete;
+    public int idToDelete = 0;
+    private string myApi = "http://localhost:7257/api/todoitems";
+    
+
+    [Serializable]
+    public class TodoTask
+    {
+        public string name;
+
+        public bool isComplete;
+    }
+
+    public void Put()
+    {
+        StartCoroutine(PutRequest());
+    }
 
     public void Post()
     {
-        StartCoroutine(Login(stringVariable, boolVariable));
+        StartCoroutine(PostRequest());
     }
 
     public void Get()
     {
-        StartCoroutine(GetRequest("http://localhost:7257/api/todoitems"));
+        StartCoroutine(GetRequest(myApi));
+    }
+
+    public void Delete()
+    {
+        StartCoroutine(DeleteRequest(myApi));
     }
 
     IEnumerator GetRequest(string uri)
@@ -45,32 +70,30 @@ public class Cliente : MonoBehaviour
                     Debug.Log(pages[page] + ":\nReceived: " + webRequest.downloadHandler.text);
                     break;
             }
+
+            webRequest.Dispose();
         }
     }
 
 
-    public IEnumerator Login(string username, bool password)
+    public IEnumerator PostRequest()
     {
-        //@TODO: call API login
-        // Store Token
-        // Add Token to headers
 
-        var user = new UserData();
-        user.Name = username;
-        user.IsComplete = password;
+        TodoTask task = new TodoTask();
+        task.name = _name;
+        task.isComplete = _isComplete;
 
-        string json = JsonUtility.ToJson(user);
+        string json = JsonUtility.ToJson(task);
 
-        var req = new UnityWebRequest("http://localhost:7257/api/todoitems", "POST");
+        var req = new UnityWebRequest(myApi, "POST");
         byte[] jsonToSend = new System.Text.UTF8Encoding().GetBytes(json);
         req.uploadHandler = (UploadHandler)new UploadHandlerRaw(jsonToSend);
         req.downloadHandler = (DownloadHandler)new DownloadHandlerBuffer();
         req.SetRequestHeader("Content-Type", "application/json");
 
-        //Send the request then wait here until it returns
         yield return req.SendWebRequest();
 
-        if (req.result != UnityWebRequest.Result.Success)
+        if (req.result == UnityWebRequest.Result.Success)
         {
             Debug.Log("Received: " + req.downloadHandler.text);        
         }
@@ -79,5 +102,46 @@ public class Cliente : MonoBehaviour
             Debug.Log("Error While Sending: " + req.error);
         }
 
+        req.Dispose();
+
+    }
+
+    public IEnumerator DeleteRequest(String endpoint)
+    {
+        int id = idToDelete;
+        UnityWebRequest www = UnityWebRequest.Delete(endpoint + "/" + id);
+        yield return www.SendWebRequest();
+        if (www.result != UnityWebRequest.Result.Success)
+        {
+            Debug.Log(www.responseCode);
+            Debug.Log(www.error);
+        }
+        Debug.Log("Delete succes");
+        www.Dispose();
+    }
+
+
+    public IEnumerator PutRequest()
+    {
+        int id = idToDelete;
+
+        TodoTask task = new TodoTask();
+        task.name = _name;
+        task.isComplete = _isComplete;
+
+        string json = JsonUtility.ToJson(task);
+
+        UnityWebRequest www = UnityWebRequest.Put(myApi + "/" + 4, json);
+        www.SetRequestHeader("Content-Type", "application/json");
+
+        yield return www.SendWebRequest();
+
+        if (www.result != UnityWebRequest.Result.Success)
+        {
+            Debug.Log(www.responseCode);
+            Debug.Log(www.error);
+        }
+        Debug.Log("Put succes");
+        www.Dispose();
     }
 }
