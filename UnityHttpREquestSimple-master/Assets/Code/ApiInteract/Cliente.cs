@@ -13,20 +13,31 @@ using UnityEngine.UI;
 
 public class Cliente : MonoBehaviour
 {
+    public int _id = 0;
     public string _name;
-    public bool _isComplete;
-    public int idToDelete = 0;
-    private string myApi = "http://localhost:7257/api/todoitems";
-    
+    public int _studentId;
+    public float _gpa;
+    public string _career;
+    public string _email;
+    public bool _isEnrolled;
 
-    [Serializable]
-    public class TodoTask
+    private string myApi = "http://localhost:7257/api/mymodels";
+    
+    public class MyModelTask
     {
         public int id;
 
         public string name;
 
-        public bool isComplete;
+        public int studentId;
+
+        public float gpa;
+
+        public string career;
+
+        public string email;
+
+        public bool isEnrolled;
     }
 
     public void Put()
@@ -80,12 +91,7 @@ public class Cliente : MonoBehaviour
 
     public IEnumerator PostRequest()
     {
-
-        TodoTask task = new TodoTask();
-        task.name = _name;
-        task.isComplete = _isComplete;
-
-        string json = JsonUtility.ToJson(task);
+        string json = JsonUtility.ToJson(JsonTask());
 
         var req = new UnityWebRequest(myApi, "POST");
         byte[] jsonToSend = new System.Text.UTF8Encoding().GetBytes(json);
@@ -110,7 +116,7 @@ public class Cliente : MonoBehaviour
 
     public IEnumerator DeleteRequest(String endpoint)
     {
-        int id = idToDelete;
+        int id = _id;
         UnityWebRequest www = UnityWebRequest.Delete(endpoint + "/" + id);
         yield return www.SendWebRequest();
         if (www.result != UnityWebRequest.Result.Success)
@@ -125,14 +131,9 @@ public class Cliente : MonoBehaviour
 
     public IEnumerator PutRequest()
     {
-        TodoTask task = new TodoTask();
-        task.id = idToDelete;
-        task.name = _name;
-        task.isComplete = _isComplete;
+        string json = JsonUtility.ToJson(JsonTask());
 
-        string json = JsonUtility.ToJson(task);
-
-        UnityWebRequest www = UnityWebRequest.Put(myApi + "/" + task.id, json);
+        UnityWebRequest www = UnityWebRequest.Put(myApi + "/" + JsonTask().id, json);
         www.SetRequestHeader("Content-Type", "application/json");
 
         yield return www.SendWebRequest();
@@ -144,5 +145,19 @@ public class Cliente : MonoBehaviour
         }
         Debug.Log("Put succes");
         www.Dispose();
+    }
+
+    public MyModelTask JsonTask()
+    {
+        MyModelTask task = new MyModelTask();
+        task.id = _id;
+        task.name = _name;
+        task.studentId = _studentId;
+        task.gpa = _gpa;
+        task.career = _career;
+        task.email = _email;
+        task.isEnrolled = _isEnrolled;
+
+        return task;
     }
 }

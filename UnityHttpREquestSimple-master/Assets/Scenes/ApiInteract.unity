@@ -707,9 +707,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1e79d5abc7ca21c438db11f4a6926de4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _name: prueba
-  _isComplete: 1
-  idToDelete: 2
+  _id: 2
+  _name: 
+  _studentId: 0
+  _gpa: 0
+  _career: 
+  _email: 
+  _isEnrolled: 1
 --- !u!4 &920914582
 Transform:
   m_ObjectHideFlags: 0
