@@ -1,15 +1,10 @@
 using SimpleJSON;
 using System;
 using System.Collections;
-using System.Collections.Generic;
-using System.IO;
-using System.Net;
-using UnityEditor.Experimental.GraphView;
-using UnityEditor.PackageManager.UI;
+using TMPro;
 using UnityEngine;
 using UnityEngine.Analytics;
 using UnityEngine.Networking;
-using UnityEngine.UI;
 
 public class Cliente : MonoBehaviour
 {
@@ -20,6 +15,9 @@ public class Cliente : MonoBehaviour
     public string _career;
     public string _email;
     public bool _isEnrolled;
+    public TMP_Text texto;
+
+    public string KeyRequest;
 
     private string myApi = "http://localhost:7257/api/mymodels";
     
@@ -58,6 +56,11 @@ public class Cliente : MonoBehaviour
     public void Delete()
     {
         StartCoroutine(DeleteRequest(myApi));
+    }
+
+    public void ERequest()
+    {
+        StartCoroutine(EspecificRequest(myApi));
     }
 
     IEnumerator GetRequest(string uri)
@@ -159,5 +162,42 @@ public class Cliente : MonoBehaviour
         task.isEnrolled = _isEnrolled;
 
         return task;
+    }
+
+    IEnumerator EspecificRequest(string uri)
+    {
+        using (UnityWebRequest webRequest = UnityWebRequest.Get(uri))
+        {
+            // Request and wait for the desired page.
+            yield return webRequest.SendWebRequest();
+            string[] pages = uri.Split('/');
+            int page = pages.Length - 1;
+
+            switch (webRequest.result)
+            {
+                case UnityWebRequest.Result.ConnectionError:
+                case UnityWebRequest.Result.DataProcessingError:
+                    Debug.LogError(pages[page] + ": Error: " + webRequest.error);
+                    break;
+                case UnityWebRequest.Result.ProtocolError:
+                    Debug.LogError(pages[page] + ": HTTP Error: " + webRequest.error);
+                    break;
+                case UnityWebRequest.Result.Success:
+                    texto.text = webRequest.downloadHandler.text;
+                    Debug.Log(pages[page] + ":\nReceived: " + webRequest.downloadHandler.text);
+                    JSONNode root = JSONNode.Parse(webRequest.downloadHandler.text);
+
+                    foreach (var sprites in root)
+                    {
+                        if (sprites.Value["id"] == _id)
+                        {
+                            texto.text = sprites.Value[KeyRequest];
+                        }
+                    }
+
+                    break;
+            }
+
+        }
     }
 }
