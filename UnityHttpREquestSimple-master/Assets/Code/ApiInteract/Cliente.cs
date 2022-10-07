@@ -1,23 +1,33 @@
 using SimpleJSON;
 using System;
 using System.Collections;
+using System.Threading.Tasks;
 using TMPro;
 using UnityEngine;
-using UnityEngine.Analytics;
 using UnityEngine.Networking;
+using UnityEngine.UI;
 
 public class Cliente : MonoBehaviour
 {
-    public int _id = 0;
-    public string _name;
-    public int _studentId;
-    public float _gpa;
-    public string _career;
-    public string _email;
-    public bool _isEnrolled;
-    public TMP_Text texto;
 
-    public string KeyRequest;
+    [Header ("Show students")]
+    public TMP_Text nametxt;
+    public TMP_Text studentIdtxt;
+    public TMP_Text gpatxt;
+    public TMP_Text careertxt;
+    public TMP_Text emailtxt;
+    public Toggle enrolledbool;
+    public Image toggleImage;
+    public Slider bar;
+
+    [Header("Add info")]
+    public TMP_InputField _name;
+    public TMP_InputField _studentId;
+    public TMP_InputField _gpa;
+    public TMP_InputField _career;
+    public TMP_InputField _email;
+    public Toggle _isEnrolled;
+
 
     private string myApi = "http://localhost:7257/api/mymodels";
     
@@ -25,15 +35,15 @@ public class Cliente : MonoBehaviour
     {
         public int id;
 
-        public string name;
+        public string name = "";
 
-        public int studentId;
+        public int studentId = 0;
 
-        public float gpa;
+        public float gpa = 0;
 
-        public string career;
+        public string career = "";
 
-        public string email;
+        public string email = "";
 
         public bool isEnrolled;
     }
@@ -119,7 +129,7 @@ public class Cliente : MonoBehaviour
 
     public IEnumerator DeleteRequest(String endpoint)
     {
-        int id = _id;
+        float id = bar.value;
         UnityWebRequest www = UnityWebRequest.Delete(endpoint + "/" + id);
         yield return www.SendWebRequest();
         if (www.result != UnityWebRequest.Result.Success)
@@ -153,13 +163,13 @@ public class Cliente : MonoBehaviour
     public MyModelTask JsonTask()
     {
         MyModelTask task = new MyModelTask();
-        task.id = _id;
-        task.name = _name;
-        task.studentId = _studentId;
-        task.gpa = _gpa;
-        task.career = _career;
-        task.email = _email;
-        task.isEnrolled = _isEnrolled;
+        task.id = int.Parse(bar.value.ToString());
+        task.name = _name.text.ToString();
+        task.studentId = int.Parse(_studentId.text);
+        task.gpa = float.Parse(_gpa.text);
+        task.career = _career.text.ToString();
+        task.email = _email.text.ToString();
+        task.isEnrolled = _isEnrolled.isOn;
 
         return task;
     }
@@ -183,15 +193,27 @@ public class Cliente : MonoBehaviour
                     Debug.LogError(pages[page] + ": HTTP Error: " + webRequest.error);
                     break;
                 case UnityWebRequest.Result.Success:
-                    texto.text = webRequest.downloadHandler.text;
                     Debug.Log(pages[page] + ":\nReceived: " + webRequest.downloadHandler.text);
                     JSONNode root = JSONNode.Parse(webRequest.downloadHandler.text);
 
                     foreach (var sprites in root)
                     {
-                        if (sprites.Value["id"] == _id)
+                        if (sprites.Value["id"] == bar.value)
                         {
-                            texto.text = sprites.Value[KeyRequest];
+                            _name.text = sprites.Value["name"];
+                            _studentId.text = sprites.Value["studentID"];
+                            _gpa.text = sprites.Value["gpa"];
+                            _career.text = sprites.Value["career"];
+                            _email.text = sprites.Value["email"];
+                            _isEnrolled.isOn = sprites.Value["isEnrolled"];
+                            if (sprites.Value["isEnrolled"] == true)
+                            {
+                                toggleImage.color = Color.green;
+                            }
+                            if (sprites.Value["isEnrolled"] == false)
+                            {
+                                toggleImage.color = Color.red;
+                            }
                         }
                     }
 
